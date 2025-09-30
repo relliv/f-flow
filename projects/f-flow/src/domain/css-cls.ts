@@ -7,6 +7,13 @@ export const F_CSS_CLASS = {
     CONNECTIONS_DRAGGING: 'f-connections-dragging',
   },
 
+  GROUPING: {
+
+    OVER_BOUNDARY: 'f-grouping-over-boundary',
+
+    DROP_ACTIVE: 'f-grouping-drop-active',
+  },
+
   CONNECTOR: {
 
     OUTPUT_CONNECTED: 'f-node-output-connected',
@@ -17,12 +24,11 @@ export const F_CSS_CLASS = {
 
     INPUT_NOT_CONNECTABLE: 'f-node-input-not-connectable',
 
-    INPUT_CAN_BE_CONNECTED_TO: 'f-node-input-can-be-connected-to',
+    CONNECTABLE: 'f-connector-connectable',
   },
 
   CONNECTION: {
 
     DRAG_HANDLE: 'f-connection-drag-handle',
-
-  }
+  },
 }

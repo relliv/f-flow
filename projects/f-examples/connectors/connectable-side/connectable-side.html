@@ -1,0 +1,35 @@
+<f-flow fDraggable (fLoaded)="loaded()">
+  <f-canvas>
+    <f-connection fOutputId="1" fInputId="2" fBehavior="fixed" fType="segment" />
+
+    <div
+      fNode
+      fDragHandle
+      [fNodePosition]="{ x: 0, y: 150 }"
+      fNodeOutput
+      fOutputId="1"
+      [fOutputConnectableSide]="outputSide()"
+    >
+      <b>{{ outputSide() }}</b> connectable side
+    </div>
+
+    <div
+      fNode
+      fDragHandle
+      [fNodePosition]="{ x: 300, y: 150 }"
+      fNodeInput
+      fInputId="2"
+      [fInputConnectableSide]="inputSide()"
+    >
+      <b>{{ inputSide() }}</b> connectable side
+    </div>
+  </f-canvas>
+</f-flow>
+<div class="examples-toolbar">
+  <f-checkbox [checked]="calculateSides()" (change)="calculateSides.set($event)"
+    >Calculate Side
+  </f-checkbox>
+  <button class="f-button" (click)="switchSides()" [disabled]="calculateSides()">
+    Switch Sides
+  </button>
+</div>

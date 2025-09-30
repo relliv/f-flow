@@ -3,11 +3,13 @@ import { FChannel } from './f-channel';
 
 export class FResizeChannel extends FChannel {
 
-  private _observer = new ResizeObserver(() => this.notify());
+  private readonly _observer = new ResizeObserver(() => this.notify());
 
   private _isObserving = false;
 
-  constructor(private _htmlElement: HTMLElement | SVGElement) {
+  constructor(
+    private readonly _htmlElement: HTMLElement | SVGElement,
+  ) {
     super();
   }
 
@@ -16,6 +18,7 @@ export class FResizeChannel extends FChannel {
       this._observer.observe(this._htmlElement);
       this._isObserving = true;
     }
+
     return super.listen(callback);
   }
 

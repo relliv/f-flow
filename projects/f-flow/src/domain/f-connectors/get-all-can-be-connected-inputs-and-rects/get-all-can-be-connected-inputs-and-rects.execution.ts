@@ -1,44 +1,62 @@
 import { GetAllCanBeConnectedInputsAndRectsRequest } from './get-all-can-be-connected-inputs-and-rects.request';
 import { inject, Injectable } from '@angular/core';
 import { FExecutionRegister, FMediator, IExecution } from '@foblex/mediator';
-import { FConnectorBase, FNodeOutletBase, FNodeOutputBase } from '../../../f-connectors';
+import {
+  FConnectorBase,
+  FNodeInputBase,
+  FNodeOutletBase,
+  FNodeOutputBase,
+} from '../../../f-connectors';
 import { FComponentsStore } from '../../../f-storage';
 import { IConnectorAndRect } from '../i-connector-and-rect';
 import { GetConnectorAndRectRequest } from '../get-connector-and-rect';
 
+/**
+ * Execution that retrieves all input connectors that can be connected to a given output or outlet connector,
+ */
 @Injectable()
 @FExecutionRegister(GetAllCanBeConnectedInputsAndRectsRequest)
 export class GetAllCanBeConnectedInputsAndRectsExecution
-  implements IExecution<GetAllCanBeConnectedInputsAndRectsRequest, IConnectorAndRect[]> {
+  implements IExecution<GetAllCanBeConnectedInputsAndRectsRequest, IConnectorAndRect[]>
+{
+  private readonly _mediator = inject(FMediator);
+  private readonly _store = inject(FComponentsStore);
 
-  private _fMediator = inject(FMediator);
-  private _fComponentsStore = inject(FComponentsStore);
-
-  private get _fInputs(): FConnectorBase[] {
-    return this._fComponentsStore.fInputs;
+  private get _targetConnectors(): FConnectorBase[] {
+    return this._store.fInputs;
   }
 
-  public handle(payload: GetAllCanBeConnectedInputsAndRectsRequest): IConnectorAndRect[] {
-    return this._getCanBeConnectedInputs(payload.fOutputOrOutlet).map((x) => {
-      return this._fMediator.execute(new GetConnectorAndRectRequest(x));
+  public handle({
+    outputOrOutlet,
+  }: GetAllCanBeConnectedInputsAndRectsRequest): IConnectorAndRect[] {
+    return this._getCanBeConnectedInputs(outputOrOutlet).map((x) => {
+      return this._mediator.execute(new GetConnectorAndRectRequest(x));
     });
   }
 
-  private _getCanBeConnectedInputs(fOutputOrOutlet: FNodeOutputBase | FNodeOutletBase): FConnectorBase[] {
-    let fInputs: FConnectorBase[] = [];
-    if (fOutputOrOutlet.canBeConnectedInputs?.length) {
-      fInputs = this._fInputs.filter((x) => fOutputOrOutlet.canBeConnectedInputs.includes(x.fId));
+  private _getCanBeConnectedInputs(
+    outputOrOutlet: FNodeOutputBase | FNodeOutletBase,
+  ): FConnectorBase[] {
+    let targetConnectors: FConnectorBase[] = [];
+    if (outputOrOutlet.hasConnectionLimits) {
+      targetConnectors = this._targetConnectors.filter((x) =>
+        outputOrOutlet.canConnectTo(x as FNodeInputBase),
+      );
     } else {
-      fInputs = this._fInputs.filter((x) => x.canBeConnected);
+      targetConnectors = this._targetConnectors.filter((x) => x.canBeConnected);
 
-      if(!fOutputOrOutlet.isSelfConnectable) {
-        fInputs = this._filterSelfConnectable(fInputs, fOutputOrOutlet);
+      if (!outputOrOutlet.isSelfConnectable) {
+        targetConnectors = this._filterSelfConnectable(targetConnectors, outputOrOutlet);
       }
     }
-    return fInputs;
+
+    return targetConnectors;
   }
 
-  private _filterSelfConnectable(fInputs: FConnectorBase[], fOutputOrOutlet: FConnectorBase): FConnectorBase[] {
-    return fInputs.filter((x) => fOutputOrOutlet.fNodeId !== x.fNodeId);
+  private _filterSelfConnectable(
+    targetConnectors: FConnectorBase[],
+    outputOrOutlet: FConnectorBase,
+  ): FConnectorBase[] {
+    return targetConnectors.filter(({ fNodeId }) => outputOrOutlet.fNodeId !== fNodeId);
   }
 }

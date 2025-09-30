@@ -4,11 +4,14 @@ import { FExecutionRegister, IExecution } from '@foblex/mediator';
 import { PointExtensions } from '@foblex/2d';
 import { FComponentsStore } from '../../../f-storage';
 
+/**
+ * It updates the canvas position and redraws the canvas when the user set a new position using the input.
+ */
 @Injectable()
 @FExecutionRegister(InputCanvasPositionRequest)
 export class InputCanvasPositionExecution implements IExecution<InputCanvasPositionRequest, void> {
 
-  private readonly _fComponentsStore = inject(FComponentsStore);
+  private readonly _store = inject(FComponentsStore);
 
   public handle(request: InputCanvasPositionRequest): void {
     if (!request.position) {
@@ -18,8 +21,9 @@ export class InputCanvasPositionExecution implements IExecution<InputCanvasPosit
     if (!PointExtensions.isEqual(position, request.position)) {
       request.transform.position = request.position;
       request.transform.scaledPosition = PointExtensions.initialize();
-      this._fComponentsStore.fCanvas?.redraw();
+      this._store.fCanvas?.redraw();
     }
+
     return void 0;
   }
 }

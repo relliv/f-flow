@@ -1,9 +1,6 @@
 import { FConnectorBase } from '../../../f-connectors';
 
 export class AddOutputToStoreRequest {
-
-  constructor(
-    public fComponent: FConnectorBase
-  ) {
-  }
+  static readonly fToken = Symbol('AddOutputToStoreRequest');
+  constructor(public readonly component: FConnectorBase) {}
 }

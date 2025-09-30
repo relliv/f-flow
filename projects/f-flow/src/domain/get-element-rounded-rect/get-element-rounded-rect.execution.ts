@@ -4,15 +4,19 @@ import { FExecutionRegister, IExecution } from '@foblex/mediator';
 import { BrowserService } from '@foblex/platform';
 import { RoundedRect, RectExtensions, IRect } from '@foblex/2d';
 
+/**
+ * Execution that retrieves the rectangle of an element with its border-radius.
+ * It calculates the rectangle based on the element's dimensions and its computed style.
+ */
 @Injectable()
 @FExecutionRegister(GetElementRoundedRectRequest)
 export class GetElementRoundedRectExecution implements IExecution<GetElementRoundedRectRequest, RoundedRect> {
 
-  private _fBrowser = inject(BrowserService);
+  private readonly _browser= inject(BrowserService);
 
   public handle(request: GetElementRoundedRectRequest): RoundedRect {
     return this._getRoundedRect(
-      RectExtensions.fromElement(request.element), request.element, this._getComputedStyle(request.element)
+      RectExtensions.fromElement(request.element), request.element, this._getComputedStyle(request.element),
     );
   }
 
@@ -25,15 +29,15 @@ export class GetElementRoundedRectExecution implements IExecution<GetElementRoun
       this._toPixels(styles.borderTopLeftRadius, element, styles.fontSize),
       this._toPixels(styles.borderTopRightRadius, element, styles.fontSize),
       this._toPixels(styles.borderBottomRightRadius, element, styles.fontSize),
-      this._toPixels(styles.borderBottomLeftRadius, element, styles.fontSize)
+      this._toPixels(styles.borderBottomLeftRadius, element, styles.fontSize),
     );
   }
 
   private _getComputedStyle(element: HTMLElement | SVGElement): CSSStyleDeclaration {
-    return this._fBrowser.window.getComputedStyle(element);
+    return this._browser.window.getComputedStyle(element);
   }
 
   private _toPixels(value: string, element: HTMLElement | SVGElement, fontSize: string): number {
-    return this._fBrowser.toPixels(value, element.clientWidth, element.clientHeight, fontSize) || 0
+    return this._browser.toPixels(value, element.clientWidth, element.clientHeight, fontSize) || 0
   }
 }

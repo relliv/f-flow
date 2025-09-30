@@ -1,48 +1,69 @@
-import { Directive, ElementRef } from '@angular/core';
+import {
+  contentChildren,
+  Directive,
+  ElementRef,
+  inject,
+  input,
+  signal,
+  Signal,
+  viewChild,
+} from '@angular/core';
 import { ILine, IPoint, LineExtensions, PointExtensions } from '@foblex/2d';
 import { EFConnectionBehavior } from './e-f-connection-behavior';
 import { EFConnectionType } from './e-f-connection-type';
 import { IHasConnectionColor } from './i-has-connection-color';
 import { IHasConnectionFromTo } from './i-has-connection-from-to';
 import { IHasConnectionText } from './i-has-connection-text';
-import { IConnectionPath } from './f-path';
-import { IConnectionGradient } from './f-gradient';
-import { FConnectionDragHandleEndComponent } from './f-drag-handle';
+import { CONNECTION_PATH, IConnectionPath } from './f-path';
+import { CONNECTION_GRADIENT, IConnectionGradient } from './f-gradient';
+import {
+  FConnectionDragHandleEndComponent,
+  FConnectionDragHandleStartComponent,
+} from './f-drag-handle';
 import { FConnectionSelectionComponent } from './f-selection';
-import { IConnectionText } from './f-connection-text';
+import { CONNECTION_TEXT, IConnectionText } from './f-connection-text';
 import { EFConnectableSide } from '../../f-connectors';
 import { FConnectionFactory } from '../f-connection-builder';
 import { IHasHostElement } from '../../i-has-host-element';
 import {
-  ISelectable, ICanChangeVisibility,
-  mixinChangeSelection, mixinChangeVisibility
+  ISelectable,
+  ICanChangeVisibility,
+  mixinChangeSelection,
+  mixinChangeVisibility,
 } from '../../mixins';
+import { FConnectionCenterDirective } from '../f-connection-center';
+import { ConnectionContentLayoutEngine, FConnectionContent } from '../f-connection-content';
 
 const MIXIN_BASE = mixinChangeSelection(
   mixinChangeVisibility(
     class {
-      constructor(
-        public hostElement: HTMLElement
-      ) {
-      }
-    }));
+      constructor(public hostElement: HTMLElement) {}
+    },
+  ),
+);
 
 @Directive()
-export abstract class FConnectionBase extends MIXIN_BASE
-  implements IHasHostElement, ISelectable,
-             ICanChangeVisibility,
-             IHasConnectionColor,
-             IHasConnectionFromTo, IHasConnectionText {
+export abstract class FConnectionBase
+  extends MIXIN_BASE
+  implements
+    IHasHostElement,
+    ISelectable,
+    ICanChangeVisibility,
+    IHasConnectionColor,
+    IHasConnectionFromTo,
+    IHasConnectionText
+{
+  private readonly _connectionFactory = inject(FConnectionFactory);
 
-  public abstract override fId: string;
+  public abstract override fId: Signal<string>;
 
-  public abstract fStartColor: string;
+  public readonly fStartColor = input<string>('black');
 
-  public abstract fEndColor: string;
+  public readonly fEndColor = input<string>('black');
 
-  public abstract fOutputId: string;
+  public abstract fOutputId: Signal<string>;
 
-  public abstract fInputId: string;
+  public abstract fInputId: Signal<string>;
 
   public abstract fRadius: number;
 
@@ -50,11 +71,13 @@ export abstract class FConnectionBase extends MIXIN_BASE
 
   public path: string = '';
 
-  public line: ILine = LineExtensions.initialize();
+  public line = LineExtensions.initialize();
 
-  public abstract fDraggingDisabled: boolean;
+  public readonly fReassignableStart: Signal<boolean> = signal(false);
 
-  public abstract override fSelectionDisabled: boolean;
+  public readonly fDraggingDisabled: Signal<boolean> = signal(false);
+
+  public override readonly fSelectionDisabled: Signal<boolean> = signal(false);
 
   public abstract boundingElement: HTMLElement | SVGElement;
 
@@ -62,36 +85,44 @@ export abstract class FConnectionBase extends MIXIN_BASE
 
   public abstract fType: EFConnectionType | string;
 
-  public abstract fDefs: ElementRef<SVGDefsElement>;
+  public readonly fDefs = viewChild.required<ElementRef<SVGDefsElement>>('defs');
 
-  public abstract fPath: IConnectionPath;
+  public readonly fPath = viewChild.required<IConnectionPath>(CONNECTION_PATH);
 
-  public abstract fGradient: IConnectionGradient;
+  public readonly fGradient = viewChild.required<IConnectionGradient>(CONNECTION_GRADIENT);
 
-  public abstract fDragHandle: FConnectionDragHandleEndComponent;
+  public readonly fDragHandleStart = viewChild(FConnectionDragHandleStartComponent);
 
-  public abstract fSelection: FConnectionSelectionComponent;
+  public readonly fDragHandleEnd = viewChild.required(FConnectionDragHandleEndComponent);
 
-  public abstract fTextComponent: IConnectionText;
+  public readonly fSelection = viewChild.required(FConnectionSelectionComponent);
+
+  public readonly fTextComponent = viewChild.required<IConnectionText>(CONNECTION_TEXT);
 
   public abstract fText: string;
 
   public abstract fTextStartOffset: string;
 
-  public abstract fConnectionCenter: ElementRef<HTMLDivElement>;
+  public readonly fConnectionCenter = viewChild<ElementRef<HTMLDivElement>>('fConnectionCenter');
 
-  private penultimatePoint: IPoint = PointExtensions.initialize();
+  public readonly fConnectionCenters = contentChildren(FConnectionCenterDirective, {
+    descendants: true,
+  });
 
-  protected constructor(
-    elementReference: ElementRef<HTMLElement>,
-    private cFactory: FConnectionFactory
-  ) {
-    super(elementReference.nativeElement);
+  public readonly fConnectionContents = contentChildren(FConnectionContent, {
+    descendants: true,
+  });
+
+  private _penultimatePoint = PointExtensions.initialize();
+  private _secondPoint = PointExtensions.initialize();
+
+  protected constructor() {
+    super(inject(ElementRef<HTMLElement>).nativeElement);
   }
 
   public initialize(): void {
-    this.fPath.initialize();
-    this.fGradient.initialize();
+    this.fPath().initialize();
+    this.fGradient().initialize();
     this.redraw();
   }
 
@@ -99,42 +130,63 @@ export abstract class FConnectionBase extends MIXIN_BASE
     return (this.hostElement.firstChild?.lastChild as HTMLElement).contains(element);
   }
 
-  public setLine({ point1, point2 }: ILine, sourceSide: EFConnectableSide, targetSide: EFConnectableSide): void {
+  public setLine(
+    { point1, point2 }: ILine,
+    sourceSide: EFConnectableSide,
+    targetSide: EFConnectableSide,
+  ): void {
     this.line = LineExtensions.initialize(point1, point2);
-    const pathResult = this.getPathResult(point1, sourceSide, point2, targetSide);
-    this.path = pathResult.path;
-    this.penultimatePoint = pathResult.penultimatePoint || point1;
-    this.fConnectionCenter?.nativeElement?.setAttribute('style', this.getTransform(pathResult.connectionCenter));
-  }
+    const pathResult = this._getPathResult(point1, sourceSide, point2, targetSide);
 
-  private getPathResult(source: IPoint, sourceSide: EFConnectableSide, target: IPoint, targetSide: EFConnectableSide): any {
-    const radius = this.fRadius > 0 ? this.fRadius : 0;
-    const offset = this.fOffset > 0 ? this.fOffset : 1;
-    return this.cFactory.handle(
-      {
-        type: this.fType,
-        payload: { source, sourceSide, target, targetSide, radius, offset }
-      }
+    this.path = pathResult.path;
+    this._penultimatePoint = pathResult.penultimatePoint || point1;
+    this._secondPoint = pathResult.secondPoint || point2;
+
+    new ConnectionContentLayoutEngine().layout(this.line, pathResult, this._contents());
+
+    this.fConnectionCenter()?.nativeElement?.setAttribute(
+      'style',
+      this._createTransformString(pathResult.connectionCenter),
     );
   }
 
-  private getTransform(position: IPoint): string {
-    return `position: absolute; pointerEvents: all; transform: translate(-50%, -50%); left: ${ position.x }px; top: ${ position.y }px`;
+  private _contents(): FConnectionContent[] {
+    return Array.from(this.fConnectionContents()?.values() ?? []);
+  }
+
+  private _getPathResult(
+    source: IPoint,
+    sourceSide: EFConnectableSide,
+    target: IPoint,
+    targetSide: EFConnectableSide,
+  ) {
+    const radius = this.fRadius > 0 ? this.fRadius : 0;
+    const offset = this.fOffset > 0 ? this.fOffset : 1;
+
+    return this._connectionFactory.handle({
+      type: this.fType,
+      payload: { source, sourceSide, target, targetSide, radius, offset },
+    });
+  }
+
+  private _createTransformString(position: IPoint, rotate: number = 0): string {
+    return `position: absolute; pointer-events: all; transform: translate(-50%, -50%) rotate(${rotate}deg); left: ${position.x}px; top: ${position.y}px`;
   }
 
   public override markChildrenAsSelected(): void {
-    this.fPath.select();
+    this.fPath().select();
   }
 
   public override unmarkChildrenAsSelected(): void {
-    this.fPath.deselect();
+    this.fPath().deselect();
   }
 
   public redraw(): void {
-    this.fPath.setPath(this.path);
-    this.fSelection.setPath(this.path);
-    this.fGradient.redraw(this.line);
-    this.fDragHandle.redraw(this.penultimatePoint, this.line.point2);
-    this.fTextComponent.redraw(this.line);
+    this.fPath().setPath(this.path);
+    this.fSelection().setPath(this.path);
+    this.fGradient().redraw(this.line);
+    this.fDragHandleEnd().redraw(this._penultimatePoint, this.line.point2);
+    this.fDragHandleStart()?.redraw(this._secondPoint, this.line.point1);
+    this.fTextComponent().redraw(this.line);
   }
 }

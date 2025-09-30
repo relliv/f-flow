@@ -11,8 +11,8 @@ import { signal } from '@angular/core';
 
 function createNode(id: string, element: HTMLElement, parentId?: string): FNodeBase {
   return {
-    fId: id,
-    fParentId: parentId,
+    fId: signal(id).asReadonly(),
+    fParentId: signal(parentId).asReadonly(),
     hostElement: element,
   } as FNodeBase;
 }
@@ -24,13 +24,14 @@ function getFCanvasBase(): FCanvasBase {
     }).asReadonly(),
     fNodesContainer: signal({
       nativeElement: document.createElement('div') as HTMLElement,
-    }).asReadonly()
+    }).asReadonly(),
   } as FCanvasBase;
 }
 
 function createElementWithId(id: string): HTMLElement {
   const element = document.createElement('div');
   element.id = id;
+
   return element;
 }
 

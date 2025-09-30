@@ -6,17 +6,19 @@ import { FComponentsStore } from '../../../f-storage';
 import { FNodeBase } from '../../../f-node';
 import { RedrawCanvasWithAnimationRequest } from '../../../domain';
 
+/**
+ * Execution that centers a group or a node inside the flow.
+ */
 @Injectable()
 @FExecutionRegister(CenterGroupOrNodeRequest)
 export class CenterGroupOrNodeExecution implements IExecution<CenterGroupOrNodeRequest, void> {
 
-  private _fComponentsStore = inject(FComponentsStore);
+  private readonly _store = inject(FComponentsStore);
+  private readonly _fMediator = inject(FMediator);
 
   private get transform(): ITransformModel {
-    return this._fComponentsStore.fCanvas!.transform;
+    return this._store.fCanvas!.transform;
   }
-
-  private _fMediator = inject(FMediator);
 
   public handle(request: CenterGroupOrNodeRequest): void {
     const fNode = this.getNode(request.id);
@@ -24,7 +26,7 @@ export class CenterGroupOrNodeExecution implements IExecution<CenterGroupOrNodeR
       return;
     }
 
-    this.toCenter(this.getNodeRect(fNode), this.getFlowRect(), fNode.position);
+    this.toCenter(this.getNodeRect(fNode), this.getFlowRect(), fNode._position);
 
     this._fMediator.execute(new RedrawCanvasWithAnimationRequest(request.animated));
   }
@@ -33,12 +35,12 @@ export class CenterGroupOrNodeExecution implements IExecution<CenterGroupOrNodeR
     this.transform.scaledPosition = PointExtensions.initialize();
     this.transform.position = PointExtensions.initialize(
       (fFlowRect.width - fNodeRect.width) / 2 - position.x * this.transform.scale,
-      (fFlowRect.height - fNodeRect.height) / 2 - position.y * this.transform.scale
+      (fFlowRect.height - fNodeRect.height) / 2 - position.y * this.transform.scale,
     );
   }
 
   private getNode(id: string): FNodeBase | undefined {
-    return this._fComponentsStore.fNodes.find((x) => x.fId === id);
+    return this._store.fNodes.find((x) => x.fId() === id);
   }
 
   private getNodeRect(fNode: FNodeBase): IRect {
@@ -46,6 +48,6 @@ export class CenterGroupOrNodeExecution implements IExecution<CenterGroupOrNodeR
   }
 
   private getFlowRect(): IRect {
-    return RectExtensions.fromElement(this._fComponentsStore.fFlow!.hostElement);
+    return RectExtensions.fromElement(this._store.fFlow!.hostElement);
   }
 }

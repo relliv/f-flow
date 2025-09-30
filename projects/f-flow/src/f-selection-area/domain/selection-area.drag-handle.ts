@@ -14,14 +14,14 @@ export class SelectionAreaDragHandle implements IFDragHandler {
   private _selectedByMove: ISelectable[] = [];
 
   private get _fCanvasPosition(): IPoint {
-    return Point.fromPoint(this._fComponentsStore.fCanvas!.transform.position)
-      .add(this._fComponentsStore.fCanvas!.transform.scaledPosition);
+    return Point.fromPoint(this._store.fCanvas!.transform.position)
+      .add(this._store.fCanvas!.transform.scaledPosition);
   }
 
   constructor(
-    private _fComponentsStore: FComponentsStore,
+    private _store: FComponentsStore,
     private _fSelectionArea: FSelectionAreaBase,
-    private _fDraggableDataContext: FDraggableDataContext,
+    private _dragContext: FDraggableDataContext,
     private _fMediator: FMediator,
   ) {
   }
@@ -32,16 +32,16 @@ export class SelectionAreaDragHandle implements IFDragHandler {
     this._fSelectionArea.show();
     this._fSelectionArea.draw(
       RectExtensions.initialize(
-        this._fDraggableDataContext.onPointerDownPosition.x,
-        this._fDraggableDataContext.onPointerDownPosition.y
-      )
+        this._dragContext.onPointerDownPosition.x,
+        this._dragContext.onPointerDownPosition.y,
+      ),
     );
   }
 
   public onPointerMove(difference: IPoint): void {
-    const currentPoint = Point.fromPoint(difference).add(this._fDraggableDataContext.onPointerDownPosition);
+    const currentPoint = Point.fromPoint(difference).add(this._dragContext.onPointerDownPosition);
 
-    const point = this._getMinimumPoint(this._fDraggableDataContext.onPointerDownPosition, currentPoint);
+    const point = this._getMinimumPoint(this._dragContext.onPointerDownPosition, currentPoint);
 
     const width = Math.abs(difference.x);
     const height = Math.abs(difference.y);
@@ -68,15 +68,15 @@ export class SelectionAreaDragHandle implements IFDragHandler {
   private _getMinimumPoint(point1: IPoint, point2: IPoint): IPoint {
     return PointExtensions.initialize(
       Math.min(point1.x, point2.x),
-      Math.min(point1.y, point2.y)
+      Math.min(point1.y, point2.y),
     );
   }
 
   public onPointerUp(): void {
     this._fSelectionArea.hide();
-    this._fDraggableDataContext.selectedItems.push(...this._selectedByMove);
+    this._dragContext.selectedItems.push(...this._selectedByMove);
     if (this._selectedByMove.length > 0) {
-      this._fDraggableDataContext.isSelectedChanged = true;
+      this._dragContext.isSelectedChanged = true;
     }
   }
 }

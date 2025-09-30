@@ -13,7 +13,7 @@ export class FCreateConnectionFromOutputPreparationExecution
   implements IHandler<FCreateConnectionFromOutputPreparationRequest, void> {
 
   private _fMediator = inject(FMediator);
-  private _fComponentsStore = inject(FComponentsStore);
+  private _store = inject(FComponentsStore);
 
   public handle(request: FCreateConnectionFromOutputPreparationRequest): void {
     if(!this._isValid(request)) {
@@ -23,7 +23,7 @@ export class FCreateConnectionFromOutputPreparationExecution
 
     if (fOutput.canBeConnected) {
       this._fMediator.execute(
-        new FCreateConnectionDragHandlerPreparationRequest(request.event.getPosition(), fOutput)
+        new FCreateConnectionDragHandlerPreparationRequest(request.event.getPosition(), fOutput),
       );
     }
   }
@@ -37,16 +37,17 @@ export class FCreateConnectionFromOutputPreparationExecution
   }
 
   private _getNodeOutlets(node: FNodeBase): FConnectorBase[] {
-    return this._fComponentsStore.fOutlets
+    return this._store.fOutlets
       .filter((x) => node.isContains(x.hostElement));
   }
 
   private _getOutput(element: Element): FNodeOutputBase {
-    const result = this._fComponentsStore.fOutputs
+    const result = this._store.fOutputs
       .find((x) => x.hostElement.contains(element));
     if (!result) {
       throw new Error('Output not found');
     }
+
     return result as FNodeOutputBase;
   }
 }

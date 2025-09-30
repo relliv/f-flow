@@ -6,11 +6,11 @@ import { FComponentsStore } from '../../f-components-store';
 @Injectable()
 @FExecutionRegister(NotifyTransformChangedRequest)
 export class NotifyTransformChangedExecution
-  implements IExecution<NotifyTransformChangedRequest, void> {
+  implements IExecution<NotifyTransformChangedRequest, void>
+{
+  private readonly _store = inject(FComponentsStore);
 
-  private _fComponentsStore = inject(FComponentsStore);
-
-  public handle(request: NotifyTransformChangedRequest): void {
-    this._fComponentsStore.transformChanged();
+  public handle(_request: NotifyTransformChangedRequest): void {
+    this._store.transformChanged();
   }
 }

@@ -1,6 +1,8 @@
+import { Signal } from "@angular/core";
+
 export interface IHasConnectionColor {
 
-  fStartColor: string;
+  fStartColor: Signal<string>;
 
-  fEndColor: string;
+  fEndColor: Signal<string>;
 }

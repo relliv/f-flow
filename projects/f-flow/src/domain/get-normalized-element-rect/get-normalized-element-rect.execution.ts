@@ -9,19 +9,24 @@ import {
   ISize,
   SizeExtensions,
   ITransformModel,
-  RectExtensions, IRect
+  RectExtensions, IRect,
 } from '@foblex/2d';
-import {GetNormalizedPointRequest} from "../get-normalized-point";
+import { GetNormalizedPointRequest } from "../get-normalized-point";
 
+/**
+ * Execution that retrieves the normalized rectangle of an element.
+ * It calculates the rectangle based on the element's position and size,
+ * adjusting for the canvas transformation and element offsets.
+ */
 @Injectable()
 @FExecutionRegister(GetNormalizedElementRectRequest)
 export class GetNormalizedElementRectExecution implements IExecution<GetNormalizedElementRectRequest, IRect> {
 
-  private readonly _fComponentsStore = inject(FComponentsStore);
-  private readonly _fMediator = inject(FMediator);
+  private readonly _store = inject(FComponentsStore);
+  private readonly _mediator = inject(FMediator);
 
   private get _transform(): ITransformModel {
-    return this._fComponentsStore.fCanvas!.transform;
+    return this._store.fCanvas!.transform;
   }
 
   public handle(request: GetNormalizedElementRectRequest): IRect {
@@ -31,6 +36,7 @@ export class GetNormalizedElementRectExecution implements IExecution<GetNormaliz
     const unscaledRect = this._getUnscaledRect(position, unscaledSize, systemRect)
 
     const offsetSize = this._getOffsetSize(request.element, unscaledSize);
+
     return RoundedRect.fromCenter(unscaledRect, offsetSize.width, offsetSize.height);
   }
 
@@ -51,7 +57,7 @@ export class GetNormalizedElementRectExecution implements IExecution<GetNormaliz
   }
 
   private _normalizePosition(rect: IRoundedRect): IPoint {
-    return this._fMediator.execute(new GetNormalizedPointRequest(rect));
+    return this._mediator.execute(new GetNormalizedPointRequest(rect));
   }
 
   private _unscaleSize(rect: IRoundedRect): ISize {
@@ -61,7 +67,7 @@ export class GetNormalizedElementRectExecution implements IExecution<GetNormaliz
   private _getUnscaledRect(position: IPoint, size: ISize, rect: IRoundedRect): IRoundedRect {
     return new RoundedRect(
       position.x, position.y, size.width, size.height,
-      rect.radius1, rect.radius2, rect.radius3, rect.radius4
+      rect.radius1, rect.radius2, rect.radius3, rect.radius4,
     )
   }
 

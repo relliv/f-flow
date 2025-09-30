@@ -4,14 +4,18 @@ import { FExecutionRegister, IExecution } from '@foblex/mediator';
 import { ITransformModel, PointExtensions } from '@foblex/2d';
 import { FComponentsStore } from '../../../f-storage';
 
+/**
+ * Execution that updates the scale of the canvas in the FComponentsStore.
+ * Occurs when the fZoom directive or User call the setScale method.
+ */
 @Injectable()
 @FExecutionRegister(UpdateScaleRequest)
 export class UpdateScaleExecution implements IExecution<UpdateScaleRequest, void> {
 
-  private _fComponentsStore = inject(FComponentsStore);
+  private readonly _store = inject(FComponentsStore);
 
   private get transform(): ITransformModel {
-    return this._fComponentsStore.fCanvas!.transform;
+    return this._store.fCanvas!.transform;
   }
 
   public handle(request: UpdateScaleRequest): void {

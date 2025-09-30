@@ -10,7 +10,7 @@ import { FCreateConnectionFromOutputPreparationRequest } from './from-output-pre
 import { FDraggableDataContext } from '../../../f-draggable-data-context';
 import { FReassignConnectionPreparationRequest } from '../../f-reassign-connection';
 import { isValidEventTrigger } from '../../../../domain';
-import {IPointerEvent} from "../../../../drag-toolkit";
+import { IPointerEvent } from "../../../../drag-toolkit";
 
 @Injectable()
 @FExecutionRegister(FCreateConnectionPreparationRequest)
@@ -18,8 +18,8 @@ export class FCreateConnectionPreparationExecution
   implements IHandler<FCreateConnectionPreparationRequest, void> {
 
   private _fMediator = inject(FMediator);
-  private _fComponentsStore = inject(FComponentsStore);
-  private _fDraggableDataContext = inject(FDraggableDataContext);
+  private _store = inject(FComponentsStore);
+  private _dragContext = inject(FDraggableDataContext);
 
   private _fNode: FNodeBase | undefined;
 
@@ -30,11 +30,11 @@ export class FCreateConnectionPreparationExecution
 
     if (isNodeOutlet(request.event.targetElement)) {
       this._fMediator.execute<void>(
-        new FCreateConnectionFromOutletPreparationRequest(request.event, this._fNode!)
+        new FCreateConnectionFromOutletPreparationRequest(request.event, this._fNode!),
       );
     } else if (isNodeOutput(request.event.targetElement)) {
       this._fMediator.execute<void>(
-        new FCreateConnectionFromOutputPreparationRequest(request.event, this._fNode!)
+        new FCreateConnectionFromOutputPreparationRequest(request.event, this._fNode!),
       );
     }
   }
@@ -44,13 +44,14 @@ export class FCreateConnectionPreparationExecution
   }
 
   private _getNode(event: IPointerEvent): FNodeBase | undefined {
-    this._fNode = this._fComponentsStore
+    this._fNode = this._store
       .fNodes.find(n => n.isContains(event.targetElement));
+
     return this._fNode;
   }
 
   private _isValidConditions(): boolean {
-    return this._fDraggableDataContext.isEmpty() && !!this._fComponentsStore.fTempConnection;
+    return this._dragContext.isEmpty() && !!this._store.fTempConnection;
   }
 
   private _isValidTrigger(request: FReassignConnectionPreparationRequest): boolean {

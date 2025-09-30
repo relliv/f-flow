@@ -28,6 +28,10 @@ export class EventExtensions {
     return EventExtensions.passiveEventListener({ passive: true });
   }
 
+  public static activeCaptureListener(): boolean | AddEventListenerOptions {
+    return EventExtensions.passiveEventListener({ passive: false, capture: true });
+  }
+
   public static emptyListener(): Function {
     return () => {
     };

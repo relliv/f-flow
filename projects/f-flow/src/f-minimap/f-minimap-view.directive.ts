@@ -7,11 +7,11 @@ import { MinimapCalculateViewBoxRequest } from './domain';
   selector: 'rect[fMinimapView]',
   host: {
     'class': 'f-component f-minimap-view',
-  }
+  },
 })
 export class FMinimapViewDirective {
 
-  private readonly _fMediator = inject(FMediator);
+  private readonly _mediator = inject(FMediator);
   private readonly _elementReference = inject(ElementRef);
 
   public get hostElement(): SVGGElement {
@@ -20,8 +20,8 @@ export class FMinimapViewDirective {
 
   public redraw(): void {
     setRectToElement(
-      this._fMediator.execute<IRect>(new MinimapCalculateViewBoxRequest()),
-      this.hostElement
+      this._mediator.execute<IRect>(new MinimapCalculateViewBoxRequest()),
+      this.hostElement,
     );
   }
 }

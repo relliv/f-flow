@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { FMediator } from '@foblex/mediator';
 import { ElementRef, Injector } from '@angular/core';
 import { FComponentsStore } from '../f-storage';
-import { FDraggableDataContext } from '../f-draggable';
+import { FDraggableDataContext } from '@foblex/flow';
 
 export class MockElementRef extends ElementRef<HTMLElement> {
   constructor() {
@@ -13,7 +13,7 @@ export class MockElementRef extends ElementRef<HTMLElement> {
 export function setupTestModule(providers: any[] = [], declarations: any[] = []): void {
   TestBed.configureTestingModule({
     declarations: [
-      ...declarations
+      ...declarations,
     ],
     providers: [
       FMediator,
@@ -21,8 +21,8 @@ export function setupTestModule(providers: any[] = [], declarations: any[] = [])
       FDraggableDataContext,
       { provide: ElementRef, useClass: MockElementRef },
       Injector,
-      ...providers
-    ]
+      ...providers,
+    ],
   }).compileComponents();
 }
 

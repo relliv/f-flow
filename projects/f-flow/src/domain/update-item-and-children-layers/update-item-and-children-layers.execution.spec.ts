@@ -2,30 +2,31 @@ import { TestBed } from '@angular/core/testing';
 import { setupTestModule } from '../test-setup';
 import { FMediator } from '@foblex/mediator';
 import { FNodeBase } from '../../f-node';
-import { FCanvasBase } from '../../f-canvas';
-import { FComponentsStore } from '../../f-storage';
-import { UpdateItemAndChildrenLayersExecution } from './update-item-and-children-layers.execution';
+import { FCanvasBase } from '@foblex/flow';
+import { FComponentsStore } from '@foblex/flow';
+import { UpdateItemAndChildrenLayersExecution } from '@foblex/flow';
 import {
   SortItemLayersExecution,
   SortItemLayersRequest,
   SortItemsByParentExecution,
-  SortNodeLayersExecution
-} from '../sort-item-layers';
-import { GetDeepChildrenNodesAndGroupsExecution } from '../get-deep-children-nodes-and-groups';
-import { MoveFrontElementsBeforeTargetElementExecution } from './move-front-elements-before-target-element';
-import { UpdateItemAndChildrenLayersRequest } from './update-item-and-children-layers.request';
+  SortNodeLayersExecution,
+} from '@foblex/flow';
+import { GetDeepChildrenNodesAndGroupsExecution } from '@foblex/flow';
+import { MoveFrontElementsBeforeTargetElementExecution } from '@foblex/flow';
+import { UpdateItemAndChildrenLayersRequest } from '@foblex/flow';
 import { signal } from '@angular/core';
 
 function createElement(id: string): HTMLElement {
   const element = document.createElement('div');
   element.id = id;
+
   return element;
 }
 
 function createNode(id: string, element: HTMLElement, parentId?: string): FNodeBase {
   return {
-    fId: id,
-    fParentId: parentId,
+    fId: signal(id).asReadonly(),
+    fParentId: signal(parentId).asReadonly(),
     hostElement: element,
   } as FNodeBase;
 }
@@ -40,7 +41,7 @@ function createCanvas(): FCanvasBase {
     }).asReadonly(),
     fConnectionsContainer: signal({
       nativeElement: document.createElement('div') as HTMLElement,
-    }).asReadonly()
+    }).asReadonly(),
   } as FCanvasBase;
 }
 

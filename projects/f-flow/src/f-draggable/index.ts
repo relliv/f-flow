@@ -16,6 +16,8 @@ export * from './f-node-rotate';
 
 export * from './f-single-select';
 
+export * from './f-drag-blocker.directive';
+
 export * from './f-draggable.directive';
 
 export * from './f-draggable-base';
@@ -26,7 +28,8 @@ export * from './f-selection-change-event';
 
 export * from './i-f-drag-and-drop-plugin';
 
-export * from './providers';
+export * from './is-drag-blocker';
 
+export * from './providers';
 
 

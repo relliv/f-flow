@@ -1,7 +1,7 @@
 import {
   AfterContentInit,
   ChangeDetectionStrategy,
-  Component, DestroyRef, ElementRef, inject, input, OnDestroy, OnInit, output
+  Component, DestroyRef, ElementRef, inject, input, OnDestroy, OnInit, output,
 } from '@angular/core';
 import { F_FLOW, FFlowBase } from './f-flow-base';
 import {
@@ -13,31 +13,31 @@ import {
   SelectAllRequest,
   SelectRequest,
   IFFlowState,
-  GetFlowStateRequest, RemoveFlowFromStoreRequest, AddFlowToStoreRequest, SortItemLayersRequest, ICurrentSelection
+  GetFlowStateRequest, RemoveFlowFromStoreRequest, AddFlowToStoreRequest, SortItemLayersRequest, ICurrentSelection,
 } from '../domain';
 import { IPoint, IRect } from '@foblex/2d';
 import { FMediator } from '@foblex/mediator';
 import {
-  FDraggableDataContext
+  FDraggableDataContext,
 } from '../f-draggable';
 import { FConnectionFactory } from '../f-connection';
 import {
   NotifyDataChangedRequest,
   F_STORAGE_PROVIDERS,
   ListenCountChangesRequest,
-  ListenDataChangesRequest
+  ListenDataChangesRequest,
 } from '../f-storage';
 import { BrowserService } from '@foblex/platform';
 import { COMMON_PROVIDERS } from '../domain';
 import { F_DRAGGABLE_PROVIDERS } from '../f-draggable';
 import { FChannelHub } from '../reactivity';
 
-let uniqueId: number = 0;
+let uniqueId = 0;
 
 @Component({
   selector: 'f-flow',
   templateUrl: './f-flow.component.html',
-  styleUrls: [ './f-flow.component.scss' ],
+  styleUrls: ['./f-flow.component.scss'],
   standalone: true,
   host: {
     '[attr.id]': 'fId()',
@@ -61,7 +61,7 @@ export class FFlowComponent extends FFlowBase implements OnInit, AfterContentIni
   private readonly _browserService = inject(BrowserService);
   private readonly _elementReference = inject(ElementRef);
 
-  public override fId = input<string>(`f-flow-${ uniqueId++ }`, { alias: 'fFlowId' });
+  public override fId = input<string>(`f-flow-${uniqueId++}`, { alias: 'fFlowId' });
 
   public override get hostElement(): HTMLElement {
     return this._elementReference.nativeElement;
@@ -85,7 +85,7 @@ export class FFlowComponent extends FFlowBase implements OnInit, AfterContentIni
 
   private _listenCountChanges(): void {
     this._fMediator.execute<FChannelHub>(
-      new ListenCountChangesRequest()
+      new ListenCountChangesRequest(),
     ).listen(this._destroyRef, () => {
       this._fMediator.execute(new SortItemLayersRequest())
     });
@@ -93,7 +93,7 @@ export class FFlowComponent extends FFlowBase implements OnInit, AfterContentIni
 
   private _listenDataChanges(): void {
     this._fMediator.execute<FChannelHub>(
-      new ListenDataChangesRequest()
+      new ListenDataChangesRequest(),
     ).listen(this._destroyRef, () => {
       this._fMediator.execute(new RedrawConnectionsRequest());
 
@@ -133,11 +133,27 @@ export class FFlowComponent extends FFlowBase implements OnInit, AfterContentIni
   }
 
   public selectAll(): void {
-    this._fMediator.execute<void>(new SelectAllRequest());
+    setTimeout(() => {
+      this._fMediator.execute<void>(new SelectAllRequest());
+    });
   }
 
-  public select(nodes: string[], connections: string[]): void {
-    this._fMediator.execute<void>(new SelectRequest(nodes, connections));
+  /**
+   * Programmatically selects nodes and connections by their IDs.
+   *
+   * This method allows external components to control the selection state of the canvas.
+   * Selected elements will appear visually highlighted. If `isSelectedChanged` is true,
+   * the next user interaction (e.g., clicking the canvas) will emit a selection change event.
+   *
+   * @param nodes - An array of node IDs to select.
+   * @param connections - An array of connection IDs to select.
+   * @param isSelectedChanged - Optional. If true (default), marks the selection state as changed,
+   * triggering a `fSelectionChange` event on the next user interaction.
+   */
+  public select(nodes: string[], connections: string[], isSelectedChanged: boolean = true): void {
+    setTimeout(() => {
+      this._fMediator.execute<void>(new SelectRequest(nodes, connections, isSelectedChanged));
+    });
   }
 
   public clearSelection(): void {

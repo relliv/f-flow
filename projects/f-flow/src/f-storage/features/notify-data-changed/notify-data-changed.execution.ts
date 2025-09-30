@@ -6,10 +6,9 @@ import { FComponentsStore } from '../../../f-storage';
 @Injectable()
 @FExecutionRegister(NotifyDataChangedRequest)
 export class NotifyDataChangedExecution implements IExecution<NotifyDataChangedRequest, void> {
+  private readonly _store = inject(FComponentsStore);
 
-  private _fComponentsStore = inject(FComponentsStore);
-
-  public handle(request: NotifyDataChangedRequest): void {
-    this._fComponentsStore.dataChanged();
+  public handle(_request: NotifyDataChangedRequest): void {
+    this._store.dataChanged();
   }
 }

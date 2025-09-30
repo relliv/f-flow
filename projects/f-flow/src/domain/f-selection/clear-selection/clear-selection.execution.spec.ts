@@ -1,18 +1,19 @@
 import { TestBed } from '@angular/core/testing';
 import { FMediator } from '@foblex/mediator';
-import { ClearSelectionRequest } from './clear-selection.request';
-import { ClearSelectionExecution } from './clear-selection.execution';
+import { ClearSelectionRequest } from '@foblex/flow';
+import { ClearSelectionExecution } from '@foblex/flow';
 import { setupTestModule } from '../../test-setup';
-import { ISelectable } from '../../../mixins';
-import { FDraggableDataContext } from '../../../f-draggable';
+import { ISelectable } from '@foblex/flow';
+import { FDraggableDataContext } from '@foblex/flow';
+import { signal } from "@angular/core";
 
 export const MOCK_SELECTABLE_ITEM: ISelectable = {
-  fId: '1',
-  fSelectionDisabled: false,
+  fId: signal('1'),
+  fSelectionDisabled: signal(false).asReadonly(),
   hostElement: document.createElement('svg'),
   markAsSelected: jasmine.createSpy('markAsSelected'),
   unmarkAsSelected: jasmine.createSpy('unmarkAsSelected'),
-  isSelected: jasmine.createSpy('isSelected').and.returnValue(true)
+  isSelected: jasmine.createSpy('isSelected').and.returnValue(true),
 };
 
 describe('ClearSelectionExecution', () => {

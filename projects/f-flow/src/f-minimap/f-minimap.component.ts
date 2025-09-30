@@ -1,6 +1,6 @@
 import {
   AfterViewInit, ChangeDetectionStrategy, Component, DestroyRef,
-  inject, Input, ViewChild,
+  inject, input, viewChild,
 } from "@angular/core";
 import { FMediator } from '@foblex/mediator';
 import { FMinimapFlowDirective } from './f-minimap-flow.directive';
@@ -11,7 +11,7 @@ import { MinimapDragFinalizeRequest, MinimapDragPreparationRequest } from './dom
 import { ListenTransformChangesRequest } from '../f-storage';
 import { debounceTime, FChannelHub, notifyOnStart } from '../reactivity';
 import { BrowserService } from '@foblex/platform';
-import {IPointerEvent} from "../drag-toolkit";
+import { IPointerEvent } from "../drag-toolkit";
 
 @Component({
   selector: 'f-minimap',
@@ -28,48 +28,42 @@ import {IPointerEvent} from "../drag-toolkit";
 })
 export class FMinimapComponent implements AfterViewInit, IFDragAndDropPlugin {
 
-  private _destroyRef = inject(DestroyRef);
-  private _fMediator = inject(FMediator);
-  private _fBrowser = inject(BrowserService);
+  private readonly _destroyRef = inject(DestroyRef);
+  private readonly _mediator = inject(FMediator);
+  private readonly _browser = inject(BrowserService);
 
-  @ViewChild(FMinimapCanvasDirective, { static: true })
-  public fMinimapCanvas!: FMinimapCanvasDirective;
+  public readonly _canvas= viewChild.required(FMinimapCanvasDirective);
+  public readonly _flow = viewChild.required(FMinimapFlowDirective);
+  public readonly _minimapView= viewChild.required(FMinimapViewDirective);
 
-  @ViewChild(FMinimapFlowDirective, { static: true })
-  public fMinimapFlow!: FMinimapFlowDirective;
-
-  @ViewChild(FMinimapViewDirective, { static: true })
-  public fMinimapView!: FMinimapViewDirective;
-
-  @Input()
-  public fMinSize: number = 1000;
+  public readonly fMinSize = input<number>(1000);
 
   public ngAfterViewInit(): void {
     this._listenTransformChanges();
   }
 
   private _listenTransformChanges(): void {
-    this._fMediator.execute<FChannelHub>(new ListenTransformChangesRequest()).pipe(
-      notifyOnStart(), debounceTime(2)
+    this._mediator.execute<FChannelHub>(new ListenTransformChangesRequest()).pipe(
+      notifyOnStart(), debounceTime(2),
     ).listen(this._destroyRef, () => {
       this._redraw()
     });
   }
 
   private _redraw(): void {
-    if (!this._fBrowser.isBrowser()) {
+    if (!this._browser.isBrowser()) {
       return;
     }
-    this.fMinimapFlow.redraw();
-    this.fMinimapView.redraw();
-    this.fMinimapCanvas.redraw();
+    this._flow().redraw();
+    this._minimapView().redraw();
+    this._canvas().redraw();
   }
 
   public onPointerDown(event: IPointerEvent): void {
-    this._fMediator.execute(new MinimapDragPreparationRequest(event, this.fMinimapFlow.model));
+    this._mediator.execute(new MinimapDragPreparationRequest(event, this._flow().model));
   }
 
   public onPointerUp(event: IPointerEvent): void {
-    this._fMediator.execute(new MinimapDragFinalizeRequest(event));
+    this._mediator.execute(new MinimapDragFinalizeRequest(event));
   }
 }

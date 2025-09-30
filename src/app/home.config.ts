@@ -1,5 +1,5 @@
 import {
-  provideBackground, provideComponents,
+  provideBackground, provideHeader, provideHeaderSearch,
   provideHero,
   provideHomeButtons,
   provideHomeFeatures,
@@ -32,6 +32,9 @@ export const HOME_CONFIGURATION = {
     }, {
       text: 'GitHub',
       href: 'https://github.com/Foblex/f-flow',
+    }, {
+      text: 'Showcase',
+      routerLink: '/showcase/overview',
     }, {
       icon: 'heart',
       text: 'Support Us',

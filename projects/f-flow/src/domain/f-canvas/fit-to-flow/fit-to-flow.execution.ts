@@ -5,14 +5,17 @@ import { IPoint, IRect, ITransformModel, PointExtensions, RectExtensions } from 
 import { FComponentsStore } from '../../../f-storage';
 import { CalculateNodesBoundingBoxRequest, RedrawCanvasWithAnimationRequest } from '../../../domain';
 
+/**
+ * Fits all nodes and groups to the flow by scaling and positioning them
+ */
 @Injectable()
 @FExecutionRegister(FitToFlowRequest)
 export class FitToFlowExecution implements IExecution<FitToFlowRequest, void> {
 
-  private _fComponentsStore = inject(FComponentsStore);
+  private readonly _store = inject(FComponentsStore);
 
   private get transform(): ITransformModel {
-    return this._fComponentsStore.fCanvas!.transform;
+    return this._store.fCanvas!.transform;
   }
 
   private _fMediator = inject(FMediator);
@@ -25,9 +28,9 @@ export class FitToFlowExecution implements IExecution<FitToFlowRequest, void> {
 
     this.fitToParent(
       fNodesRect,
-      RectExtensions.fromElement(this._fComponentsStore.fFlow!.hostElement),
-      this._fComponentsStore.fNodes.map((x) => x.position),
-      request.toCenter
+      RectExtensions.fromElement(this._store.fFlow!.hostElement),
+      this._store.fNodes.map((x) => x._position),
+      request.toCenter,
     );
 
     this._fMediator.execute(new RedrawCanvasWithAnimationRequest(request.animated));
@@ -54,6 +57,7 @@ export class FitToFlowExecution implements IExecution<FitToFlowRequest, void> {
   private getZeroPositionWithoutScale(points: IPoint[]): IPoint {
     const xPoint = points.length ? Math.min(...points.map((point) => point.x)) : 0;
     const yPoint = points.length ? Math.min(...points.map((point) => point.y)) : 0;
+
     return PointExtensions.initialize(xPoint, yPoint)
   }
 }

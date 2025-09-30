@@ -89,3 +89,10 @@ Questions, suggestions or bugs? Contact support@foblex.com
 
 Foblex Flow is MIT licensed — free to use and open for contribution.
 
+## 💬 Support the Project
+
+If Foblex Flow has helped you build something awesome — consider giving it a ⭐️ on GitHub:  
+[https://github.com/foblex/flow](https://github.com/foblex/flow)
+
+It helps the project reach more people, keeps development going, and motivates future improvements.
+
