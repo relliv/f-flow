@@ -9,8 +9,11 @@
       fNodeOutput
       fOutputId="1"
       [fOutputConnectableSide]="outputSide()"
+      [fOutputDirectionLock]="directionLock()"
     >
-      <b>{{ outputSide() }}</b> connectable side
+      <b>{{ outputSide() }}</b> connectable side @if (directionLock() !== 'none') {
+      <div><small>Lock: {{ directionLock() }}</small></div>
+      }
     </div>
 
     <div
@@ -20,8 +23,11 @@
       fNodeInput
       fInputId="2"
       [fInputConnectableSide]="inputSide()"
+      [fInputDirectionLock]="directionLock()"
     >
-      <b>{{ inputSide() }}</b> connectable side
+      <b>{{ inputSide() }}</b> connectable side @if (directionLock() !== 'none') {
+      <div><small>Lock: {{ directionLock() }}</small></div>
+      }
     </div>
   </f-canvas>
 </f-flow>
@@ -31,5 +37,8 @@
   </f-checkbox>
   <button class="f-button" (click)="switchSides()" [disabled]="calculateSides()">
     Switch Sides
+  </button>
+  <button class="f-button" (click)="switchDirectionLock()" [disabled]="!calculateSides()">
+    Direction Lock: {{ directionLock() }}
   </button>
 </div>

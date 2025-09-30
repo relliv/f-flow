@@ -1,4 +1,5 @@
 import { EFConnectableSide } from './e-f-connectable-side';
+import { EFDirectionLock } from './e-f-direction-lock';
 import { IHasHostElement } from '../i-has-host-element';
 import { Signal } from '@angular/core';
 
@@ -28,6 +29,8 @@ export abstract class FConnectorBase implements IHasHostElement {
   public fConnectableSide: EFConnectableSide = EFConnectableSide.AUTO;
 
   public userFConnectableSide: EFConnectableSide = EFConnectableSide.AUTO;
+
+  public fDirectionLock: EFDirectionLock = EFDirectionLock.NONE;
 
   public isContains(element: HTMLElement | SVGElement): boolean {
     return this.hostElement.contains(element);

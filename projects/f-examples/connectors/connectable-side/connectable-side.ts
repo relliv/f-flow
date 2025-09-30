@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, signal, viewChild } from '@angular/core';
-import { EFConnectableSide, FCanvasComponent, FFlowModule } from '@foblex/flow';
+import { EFConnectableSide, EFDirectionLock, FCanvasComponent, FFlowModule } from '@foblex/flow';
 import { FCheckboxComponent } from '@foblex/m-render';
 
 @Component({
@@ -14,6 +14,7 @@ export class ConnectableSide {
   private readonly _canvas = viewChild.required(FCanvasComponent);
 
   protected readonly calculateSides = signal(false);
+  protected readonly directionLock = signal(EFDirectionLock.NONE);
 
   private readonly _outputSide = signal(EFConnectableSide.RIGHT);
   private readonly _inputSide = signal(EFConnectableSide.TOP);
@@ -35,6 +36,12 @@ export class ConnectableSide {
     const inputIndex = sides.indexOf(this._inputSide());
     this._outputSide.set(sides[(outputIndex + 1) % sides.length]);
     this._inputSide.set(sides[(inputIndex + 1) % sides.length]);
+  }
+
+  protected switchDirectionLock(): void {
+    const locks = [EFDirectionLock.NONE, EFDirectionLock.HORIZONTAL, EFDirectionLock.VERTICAL];
+    const currentIndex = locks.indexOf(this.directionLock());
+    this.directionLock.set(locks[(currentIndex + 1) % locks.length]);
   }
 
   private _sides(): EFConnectableSide[] {

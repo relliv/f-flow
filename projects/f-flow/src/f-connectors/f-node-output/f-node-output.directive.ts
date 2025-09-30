@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import { FNodeOutputBase, F_NODE_OUTPUT } from './f-node-output-base';
 import { EFConnectableSide } from '../e-f-connectable-side';
+import { EFDirectionLock } from '../e-f-direction-lock';
 import { F_NODE } from '../../f-node';
 import { castToEnum } from '@foblex/utils';
 import { FMediator } from '@foblex/mediator';
@@ -59,6 +60,12 @@ export class FNodeOutputDirective extends FNodeOutputBase implements OnInit, OnC
     transform: (value: unknown) => castToEnum(value, 'fOutputConnectableSide', EFConnectableSide),
   })
   public override userFConnectableSide: EFConnectableSide = EFConnectableSide.AUTO;
+
+  @Input({
+    alias: 'fOutputDirectionLock',
+    transform: (value: unknown) => castToEnum(value, 'fOutputDirectionLock', EFDirectionLock),
+  })
+  public override fDirectionLock: EFDirectionLock = EFDirectionLock.NONE;
 
   @Input()
   public override isSelfConnectable: boolean = true;

@@ -10,6 +10,8 @@ The demo highlights two modes:
 - **Manual mode** – You can switch the output and input sides of the nodes manually. This allows you to see how connections are drawn when sides are fixed.
 - **Calculated mode** – The side is set to **CALCULATE**, meaning it is determined dynamically based on the relative positions of connected nodes.
 
+Additionally, you can use **Direction Lock** to constrain the calculated side to only horizontal (LEFT/RIGHT) or vertical (TOP/BOTTOM) directions. This is useful when you want to enforce a specific connection orientation while still allowing automatic side selection within that constraint.
+
 This flexibility gives you precise control over connection behavior, while still supporting automatic side calculation for dynamic layouts.
 
 ## Example

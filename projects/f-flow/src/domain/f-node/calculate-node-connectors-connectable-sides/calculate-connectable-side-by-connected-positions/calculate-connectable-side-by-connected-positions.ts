@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { FExecutionRegister, FMediator, IExecution } from '@foblex/mediator';
 import { CalculateConnectableSideByConnectedPositionsRequest } from './calculate-connectable-side-by-connected-positions-request';
-import { EFConnectableSide, FConnectorBase } from '../../../../f-connectors';
+import { EFConnectableSide, EFDirectionLock, FConnectorBase } from '../../../../f-connectors';
 import { IPoint, PointExtensions, RectExtensions } from '@foblex/2d';
 import { CalculateConnectableSideByInternalPositionRequest } from '../calculate-connectable-side-by-internal-position';
 
@@ -37,7 +37,7 @@ export class CalculateConnectableSideByConnectedPositions
 
     const avg = this._calculateAveragePoint(targetCenters);
 
-    return this._determineSide(selfCenter, avg);
+    return this._determineSide(selfCenter, avg, connector.fDirectionLock);
   }
 
   /**
@@ -83,16 +83,29 @@ export class CalculateConnectableSideByConnectedPositions
    *
    * @param self - The gravity center of the current connector.
    * @param avg - The average gravity center of connected connectors.
+   * @param directionLock - Optional direction lock to restrict side calculation to horizontal or vertical only.
    * @returns {EFConnectableSide} - The chosen side (LEFT, RIGHT, TOP, BOTTOM).
    */
   private _determineSide(
     self: { x: number; y: number },
     avg: { x: number; y: number },
+    directionLock: EFDirectionLock = EFDirectionLock.NONE,
   ): EFConnectableSide {
     const dx = avg.x - self.x;
     const dy = avg.y - self.y;
     const snapEps = 2; // px — hysteresis threshold to avoid side-flipping near diagonals
 
+    // If direction lock is set to HORIZONTAL, only return LEFT or RIGHT
+    if (directionLock === EFDirectionLock.HORIZONTAL) {
+      return dx < 0 ? EFConnectableSide.LEFT : EFConnectableSide.RIGHT;
+    }
+
+    // If direction lock is set to VERTICAL, only return TOP or BOTTOM
+    if (directionLock === EFDirectionLock.VERTICAL) {
+      return dy < 0 ? EFConnectableSide.TOP : EFConnectableSide.BOTTOM;
+    }
+
+    // Default behavior (no lock)
     if (Math.abs(dx) - Math.abs(dy) > snapEps) {
       return dx < 0 ? EFConnectableSide.LEFT : EFConnectableSide.RIGHT;
     }

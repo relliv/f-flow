@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import { F_NODE_INPUT, FNodeInputBase } from './f-node-input-base';
 import { EFConnectableSide } from '../e-f-connectable-side';
+import { EFDirectionLock } from '../e-f-direction-lock';
 import { F_NODE } from '../../f-node';
 import { castToEnum } from '@foblex/utils';
 import { FMediator } from '@foblex/mediator';
@@ -63,6 +64,12 @@ export class FNodeInputDirective extends FNodeInputBase implements OnInit, OnCha
     transform: (value: unknown) => castToEnum(value, 'fInputConnectableSide', EFConnectableSide),
   })
   public override userFConnectableSide: EFConnectableSide = EFConnectableSide.AUTO;
+
+  @Input({
+    alias: 'fInputDirectionLock',
+    transform: (value: unknown) => castToEnum(value, 'fInputDirectionLock', EFDirectionLock),
+  })
+  public override fDirectionLock: EFDirectionLock = EFDirectionLock.NONE;
 
   public override get fNodeId(): string {
     return this._node.fId();
