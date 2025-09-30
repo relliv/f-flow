@@ -85,7 +85,7 @@ export class FNodeInputDirective extends FNodeInputBase implements OnInit, OnCha
   }
 
   public ngOnChanges(changes: SimpleChanges): void {
-    if (changes['userFConnectableSide']) {
+    if (changes['userFConnectableSide'] || changes['fDirectionLock']) {
       this._node.refresh();
     }
   }

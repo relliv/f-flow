@@ -87,7 +87,7 @@ export class FNodeOutputDirective extends FNodeOutputBase implements OnInit, OnC
   }
 
   public ngOnChanges(changes: SimpleChanges): void {
-    if (changes['userFConnectableSide']) {
+    if (changes['userFConnectableSide'] || changes['fDirectionLock']) {
       this._node.refresh();
     }
   }
